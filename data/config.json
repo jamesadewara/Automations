@@ -1,0 +1,37 @@
+{
+    "categories": [
+        {
+            "category": "Images",
+            "extensions": ["jpg", "jpeg", "png", "gif", "bmp", "tiff", "svg", "webp"]
+        },
+        {
+            "category": "Documents",
+            "extensions": ["pdf", "doc", "docx", "txt", "rtf", "odt", "xls", "xlsx", "ppt", "pptx", "csv"]
+        },
+        {
+            "category": "Videos",
+            "extensions": ["mp4", "avi", "mov", "mkv", "flv", "wmv", "webm", "mpeg"]
+        },
+        {
+            "category": "Audio",
+            "extensions": ["mp3", "wav", "aac", "flac", "ogg", "wma", "m4a", "alac"]
+        },
+        {
+            "category": "Archives",
+            "extensions": ["zip", "rar", "7z", "tar", "gz", "bz2"]
+        },
+        {
+            "category": "Executables",
+            "extensions": ["exe", "msi", "bat", "sh", "jar"]
+        },
+        {
+            "category": "Scripts",
+            "extensions": ["py", "js", "rb", "php", "pl", "sh", "r", "cpp", "c", "java", "cs"]
+        }
+    ],
+    "strict_mode": {
+        "duplicate_handling": "merge" 
+    },
+    "unspecified_extension_handling": "move_to_other",  
+    "time_conscious": true 
+}
