@@ -273,21 +273,21 @@ class WebScrapingMachine:
 
     Methods
     -------
-    install_driver():
+    installDriver():
         Installs the required driver if it doesn't exist.
-    get_driver():
+    getDriver():
         Initializes and returns the appropriate webdriver.
-    detect_website_type():
+    detectWebsiteType():
         Detects if a website is dynamic or static.
-    scrape_static():
+    scrapeStatic():
         Scrapes a static website.
-    scrape_dynamic():
+    scrapeDynamic():
         Scrapes a dynamic website.
-    scrape_ai():
+    scrapeAi():
         Scrapes a website using AI-based methods.
-    save_data(file_type, file_name):
+    saveData(file_type, file_name):
         Saves the scraped data in the specified format.
-    scrape_website(file_type='csv', file_name='scraped_data'):
+    scrapeWebsite(file_type='csv', file_name='scraped_data'):
         Main function to scrape the website.
     """
 
@@ -310,7 +310,7 @@ class WebScrapingMachine:
         self.driver = None
         self.data = []
 
-    def install_driver(self):
+    def installDriver(self):
         """
         Installs the required driver if it doesn't exist.
 
@@ -325,7 +325,7 @@ class WebScrapingMachine:
             warnings.warn(f"Driver installation failed: {e}")
             return None
 
-    def get_driver(self):
+    def getDriver(self):
         """
         Initializes and returns the appropriate webdriver.
 
@@ -340,7 +340,7 @@ class WebScrapingMachine:
             The initialized webdriver.
         """
         if self.driver_name.lower() == 'chrome':
-            driver_path = self.install_driver()
+            driver_path = self.installDriver()
             if driver_path:
                 service = Service(driver_path)
                 options = Options()
@@ -354,7 +354,7 @@ class WebScrapingMachine:
         else:
             raise ValueError(f"Driver '{self.driver_name}' is not supported.")
 
-    def detect_website_type(self):
+    def detectWebsiteType(self):
         """
         Detects if a website is dynamic or static.
 
@@ -372,7 +372,7 @@ class WebScrapingMachine:
             warnings.warn(f"Failed to access the website: {e}")
             return 'static'
 
-    def scrape_static(self):
+    def scrapeStatic(self):
         """
         Scrapes a static website and stores the data in the data attribute.
         """
@@ -383,11 +383,11 @@ class WebScrapingMachine:
         except requests.RequestException as e:
             warnings.warn(f"Failed to scrape static content: {e}")
 
-    def scrape_dynamic(self):
+    def scrapeDynamic(self):
         """
         Scrapes a dynamic website and stores the data in the data attribute.
         """
-        self.get_driver()
+        self.getDriver()
         if self.driver:
             try:
                 self.driver.get(self.url)
@@ -398,7 +398,7 @@ class WebScrapingMachine:
             finally:
                 self.driver.quit()
 
-    def scrape_ai(self):
+    def scrapeAi(self):
         """
         Scrapes a website using AI-based methods and stores the data in the data attribute.
         """
@@ -411,7 +411,7 @@ class WebScrapingMachine:
         except requests.RequestException as e:
             warnings.warn(f"Failed to scrape AI content: {e}")
 
-    def save_data(self, file_type, file_name):
+    def saveData(self, file_type, file_name):
         """
         Saves the scraped data in the specified format.
 
@@ -422,6 +422,14 @@ class WebScrapingMachine:
         file_name : str
             The name of the file.
         """
+        try:
+            file_segments = os.path.normpath("web_scraper.py").split(os.sep)
+            if len(file_segments) > 1:
+                file_segments.pop()
+                os.makedirs("/".join(file_segments))
+          
+        except:pass
+
         try:
             df = pd.DataFrame(self.data, columns=['Data'])
             if file_type.lower() == 'csv':
@@ -436,7 +444,7 @@ class WebScrapingMachine:
         except Exception as e:
             warnings.warn(f"Failed to save data: {e}")
 
-    def scrape_website(self, file_type='csv', file_name='scraped_data'):
+    def scrapeWebsite(self, file_type='csv', file_name='scraped_data'):
         """
         Main function to scrape the website and save the data.
 
@@ -450,18 +458,18 @@ class WebScrapingMachine:
         try:
             with tqdm(total=100, desc="Scraping progress", unit='%') as pbar:
                 if self.mode == 'static':
-                    self.scrape_static()
+                    self.scrapeStatic()
                 elif self.mode == 'dynamic':
-                    self.scrape_dynamic()
+                    self.scrapeDynamic()
                 elif self.mode == 'ai':
-                    self.scrape_ai()
+                    self.scrapeAi()
                 else:
                     warnings.warn(f"Invalid mode '{self.mode}', defaulting to dynamic.")
-                    self.scrape_dynamic()
+                    self.scrapeDynamic()
 
                 pbar.update(100)
 
-            self.save_data(file_type, file_name)
+            self.saveData(file_type, file_name)
         except Exception as e:
             warnings.warn(f"An error occurred during the scraping process: {e}")
 

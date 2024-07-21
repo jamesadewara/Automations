@@ -8,7 +8,7 @@ def run():
     mode = input("Enter the mode of scraping (static, dynamic, ai, default is dynamic): ") or 'dynamic'
 
     scraper = WebScrapingMachine(url, driver_name, mode)
-    scraper.scrape_website(file_type, file_name)
+    scraper.scrapeWebsite(file_type, file_name)
 
 if __name__ == '__main__':
     run()
