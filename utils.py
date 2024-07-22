@@ -1,6 +1,7 @@
 # import all necessary modules/libraries
 # built in libraries
 import os
+import time
 import shutil
 import json
 import logging
@@ -325,7 +326,13 @@ class WebScrapingMachine:
             The path to the installed driver.
         """
         try:
-            return ChromeDriverManager().install()
+            with tqdm(total=100, desc="Installing driver", unit='%', ncols=100) as pbar:
+                for i in range(10):
+                    time.sleep(0.1)  # Simulating the progress
+                    pbar.update(10)
+                driver_path = ChromeDriverManager().install()
+                pbar.update(100 - pbar.n)
+            return driver_path
         except Exception as e:
             warnings.warn(f"Driver installation failed: {e}")
             return None
@@ -408,7 +415,8 @@ class WebScrapingMachine:
         Scrapes a website using AI-based methods and stores the data in the data attribute.
         """
         try:
-            response = requests.get(self.url)
+            session = requests.Session()
+            response = session.get(self.url, headers={'User-Agent': 'Mozilla/5.0'})
             if response.status_code == 200:
                 page_content = response.text
                 ai_response = openai.Completion.create(
