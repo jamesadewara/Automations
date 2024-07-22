@@ -18,6 +18,7 @@ from selenium.webdriver.chrome.options import Options
 import pandas as pd
 from tqdm import tqdm
 from webdriver_manager.chrome import ChromeDriverManager
+import openai
 
 class FileAutomation:
     def __init__(self, input_dir: str, output_dir: str, config_path: str):
@@ -291,7 +292,7 @@ class WebScrapingMachine:
         Main function to scrape the website.
     """
 
-    def __init__(self, url, driver_name='chrome', mode='dynamic'):
+    def __init__(self, url, driver_name='chrome', mode='dynamic', api_key=None):
         """
         Constructs all the necessary attributes for the WebScrapingMachine object.
 
@@ -303,12 +304,16 @@ class WebScrapingMachine:
             The name of the driver to be used for dynamic scraping (default is 'chrome').
         mode : str, optional
             The mode of scraping (default is 'dynamic').
+        api_key=None: str, optional
+            The  api_key from openai
         """
         self.url = url
         self.driver_name = driver_name
         self.mode = mode
         self.driver = None
         self.data = []
+        self.api_key = api_key
+        openai.api_key = self.api_key
 
     def installDriver(self):
         """
@@ -398,17 +403,23 @@ class WebScrapingMachine:
             finally:
                 self.driver.quit()
 
-    def scrapeAi(self):
+    def scrapeAi(self, max_tokens):
         """
         Scrapes a website using AI-based methods and stores the data in the data attribute.
         """
-        # Mock AI-based scraping functionality
         try:
             response = requests.get(self.url)
-            soup = BeautifulSoup(response.content, 'html.parser')
-            # Assume AI scraping targets more specific elements
-            self.data = [item.get_text() for item in soup.find_all(['h1', 'h2', 'h3', 'p'])]
-        except requests.RequestException as e:
+            if response.status_code == 200:
+                page_content = response.text
+                ai_response = openai.Completion.create(
+                    model="text-davinci-003",
+                    prompt=f"Extract and summarize the main text content from this webpage: {page_content}",
+                    max_tokens=max_tokens
+                )
+                self.data = ai_response.choices[0].text.strip().split('\n')
+            else:
+                warnings.warn(f"Failed to fetch the page content, status code: {response.status_code}")
+        except Exception as e:
             warnings.warn(f"Failed to scrape AI content: {e}")
 
     def saveData(self, file_type, file_name):
@@ -422,14 +433,7 @@ class WebScrapingMachine:
         file_name : str
             The name of the file.
         """
-        try:
-            file_segments = os.path.normpath("web_scraper.py").split(os.sep)
-            if len(file_segments) > 1:
-                file_segments.pop()
-                os.makedirs("/".join(file_segments))
-          
-        except:pass
-
+        
         try:
             df = pd.DataFrame(self.data, columns=['Data'])
             if file_type.lower() == 'csv':
@@ -444,7 +448,7 @@ class WebScrapingMachine:
         except Exception as e:
             warnings.warn(f"Failed to save data: {e}")
 
-    def scrapeWebsite(self, file_type='csv', file_name='scraped_data'):
+    def scrapeWebsite(self, file_type='csv', file_name='scraped_data', file_dir=None, max_tokens=1000):
         """
         Main function to scrape the website and save the data.
 
@@ -462,14 +466,19 @@ class WebScrapingMachine:
                 elif self.mode == 'dynamic':
                     self.scrapeDynamic()
                 elif self.mode == 'ai':
-                    self.scrapeAi()
+                    self.scrapeAi(max_tokens)
                 else:
                     warnings.warn(f"Invalid mode '{self.mode}', defaulting to dynamic.")
                     self.scrapeDynamic()
 
                 pbar.update(100)
-
-            self.saveData(file_type, file_name)
+            try:
+                os.makedirs(file_dir)
+                if file_dir != None:
+                    warnings.warn(f"created this dir {file_dir} for the file {file_name}")
+            except:
+                pass
+            self.saveData(file_type, os.path.join(file_dir, file_name))
         except Exception as e:
             warnings.warn(f"An error occurred during the scraping process: {e}")
 

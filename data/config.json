@@ -33,5 +33,5 @@
         "duplicate_handling": "merge" 
     },
     "unspecified_extension_handling": "move_to_other",  
-    "time_conscious": true 
+    "time_conscious": false 
 }
