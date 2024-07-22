@@ -419,12 +419,15 @@ class WebScrapingMachine:
             response = session.get(self.url, headers={'User-Agent': 'Mozilla/5.0'})
             if response.status_code == 200:
                 page_content = response.text
-                ai_response = openai.Completion.create(
-                    model="text-davinci-003",
-                    prompt=f"Extract and summarize the main text content from this webpage: {page_content}",
+                ai_response = openai.ChatCompletion.create(
+                    model="gpt-3.5-turbo",
+                    messages=[
+                        {"role": "system", "content": "You are a helpful assistant, useful for web scraping."},
+                        {"role": "user", "content": f"Extract and summarize the main text content from this webpage: {page_content}"}
+                    ],
                     max_tokens=max_tokens
                 )
-                self.data = ai_response.choices[0].text.strip().split('\n')
+                self.data = ai_response.choices[0].message['content'].strip().split('\n')
             else:
                 warnings.warn(f"Failed to fetch the page content, status code: {response.status_code}")
         except Exception as e:
